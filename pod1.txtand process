@@ -1,0 +1,49 @@
+# Deployment ka type specify karta hai
+apiVersion: apps/v1
+
+# Yeh object ek Deployment hai
+kind: Deployment
+
+# Metadata section: deployment ka naam define kar rahe hain
+metadata:
+  name: frontend-deployment  # Deployment ka naam
+
+# Deployment specification
+spec:
+  replicas: 1                # 1 pod banana hai
+  selector:
+    matchLabels:
+      app: frontend          # Selector label jo pod se match karega
+  template:
+    metadata:
+      labels:
+        app: frontend        # Pod ko yeh label diya gaya hai
+    spec:
+      containers:
+      - name: frontend-container  # Container ka naam
+        image: containerregistryac.azurecr.io/myapp:v1  # ACR se image pull karega
+        ports:
+        - containerPort: 80       # Container ka port jahan app run karega
+---
+# Ab service define kar rahe hain jo pod ko public access degi
+apiVersion: v1
+
+# Yeh object ek Service hai
+kind: Service
+
+# Service ka metadata
+metadata:
+  name: frontend-service     # Service ka naam
+
+# Service specification
+spec:
+  selector:
+    app: frontend            # Yeh service unhi pods ko target karegi jinke paas app: frontend label hoga
+  type: LoadBalancer         # Public IP assign karega (external access ke liye)
+  ports:
+  - port: 80                 # Service ka port (publicly expose hoga)
+    targetPort: 80           # Pod ke andar container ka port
+
+Run this command:
+
+ kubectl apply -f frontend-deployment.yaml
